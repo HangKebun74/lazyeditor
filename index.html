@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LazyEditor v1.0.0 - Lightweight WYSIWYG HTML Editor</title>
+    <link rel="stylesheet" href="lazyeditor.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #4299e1;
+        }
+        .header h1 {
+            color: #2b6cb0;
+            margin-bottom: 10px;
+        }
+        .header .subtitle {
+            color: #718096;
+            font-size: 18px;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .demo-section h2 {
+            color: #2c5282;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .preset-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            background: #f8fbff;
+        }
+        .preset-card h3 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #c53030;
+        }
+        .instructions {
+            background: #e8f0ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #4299e1;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c5282;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #63b3ed;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+        .try-it {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .try-it:hover {
+            background: #3182ce;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LAZYEDITOR v1.0.0</h1>
+        <div class="subtitle">Lightweight WYSIWYG HTML Editor - No Dependencies, ASCII Interface</div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🚀 Quick Start</h2>
+        <div class="instructions">
+            <h3>Just 2 Steps!</h3>
+            <ol>
+                <li>Include both CSS and JS files in your HTML:
+                    <br><code>&lt;link rel="stylesheet" href="lazyeditor.css"&gt;</code>
+                    <br><code>&lt;script src="lazyeditor.js"&gt;&lt;/script&gt;</code>
+                </li>
+                <li>Add class to any textarea:
+                    <br><code>&lt;textarea class="lazy[m]"&gt;Your text here&lt;/textarea&gt;</code>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎮 Live Demo - Try Different Presets</h2>
+        
+        <div class="preset-grid">
+            <div class="preset-card">
+                <h3>1. Minimal (xs)</h3>
+                <p>Just bold and italic buttons.</p>
+                <textarea class="lazy[xs]" rows="4">Try <b>bold</b> and <i>italic</i> text here.</textarea>
+            </div>
+            
+            <div class="preset-card">
+                <h3>2. Default (m)</h3>
+                <p>Most common formatting tools.</p>
+                <textarea class="lazy[m]" rows="4">Create lists, add links, and format text.</textarea>
+            </div>
+            
+            <div class="preset-card">
+                <h3>3. Full Featured (xxl)</h3>
+                <p>All available buttons.</p>
+                <textarea class="lazy[xxl]" rows="4">Code blocks, quotes, print, RTL and more.</textarea>
+            </div>
+            
+            <div class="preset-card">
+                <h3>4. Custom Buttons</h3>
+                <p>Pick specific buttons: 1,2,7 (Bold, Italic, Link)</p>
+                <textarea class="lazy[1,2,7]" rows="4">Custom button selection works too!</textarea>
+            </div>
+        </div>
+        
+        <button class="try-it" onclick="addNewEditor()">➕ Add Another Editor</button>
+    </div>
+
+    <div class="demo-section">
+        <h2>📋 Available Presets</h2>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#e8f0ff;">
+                    <th style="padding:10px; text-align:left;">Preset</th>
+                    <th style="padding:10px; text-align:left;">Buttons</th>
+                    <th style="padding:10px; text-align:left;">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[zzz]</code></td>
+                    <td style="padding:10px;">None</td>
+                    <td style="padding:10px;">Empty toolbar (just view toggle)</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[xs]</code></td>
+                    <td style="padding:10px;">B, I</td>
+                    <td style="padding:10px;">Bold, Italic</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[s]</code></td>
+                    <td style="padding:10px;">B, I, *</td>
+                    <td style="padding:10px;">Adds bullet list</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[m]</code></td>
+                    <td style="padding:10px;">B, I, *, 1., URL</td>
+                    <td style="padding:10px;"><strong>DEFAULT:</strong> Adds numbered list and link</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[l]</code></td>
+                    <td style="padding:10px;">B, I, U, *, 1., URL, ---</td>
+                    <td style="padding:10px;">Adds underline and horizontal line</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[xl]</code></td>
+                    <td style="padding:10px;">B, I, U, S, *, 1., URL, ---</td>
+                    <td style="padding:10px;">Adds strikethrough</td>
+                </tr>
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><code>lazy[xxl]</code></td>
+                    <td style="padding:10px;">All except IMG and TABLE</td>
+                    <td style="padding:10px;">Full featured with code, quote, print, RTL</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="demo-section">
+        <h2>⭐ Features</h2>
+        <div class="features">
+            <div class="feature"><strong>🚫 No Dependencies</strong><br>Pure vanilla JavaScript</div>
+            <div class="feature"><strong>🎯 ASCII Interface</strong><br>Clean, simple button labels</div>
+            <div class="feature"><strong>🔧 Custom Presets</strong><br>Choose specific buttons</div>
+            <div class="feature"><strong>👁️ Dual View</strong><br>Design mode & HTML mode</div>
+            <div class="feature"><strong>🐛 Debug Mode</strong><br>Helpful error messages</div>
+            <div class="feature"><strong>⌨️ Keyboard Shortcuts</strong><br>Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K</div>
+            <div class="feature"><strong>📱 Responsive</strong><br>Works on all screen sizes</div>
+            <div class="feature"><strong>🔄 Auto-sync</strong><br>Real-time content updates</div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>⚙️ Configuration</h2>
+        <p>Edit these settings in <code>lazyeditor.js</code>:</p>
+        <pre style="background:#f1f5f9; padding:15px; border-radius:5px; overflow-x:auto;">
+const LE_CONFIG = {
+    debugMode: true,                    // Show/hide debug panel
+    defaultHeight: '160px',             // Initial editor height
+    defaultPreset: 'm',                 // Default button preset
+    enablePlaceholder: true,            // Show placeholder text
+    showBranding: true,                 // Show "LazyEditor" in status bar
+    debounceDelay: 250                  // Auto-save delay (ms)
+};</pre>
+    </div>
+
+    <div class="footer">
+        <p>LazyEditor v1.0.0 - MIT License © 2024</p>
+        <p>GitHub: <a href="https://github.com/HangKebun74/lazyeditor" target="_blank">github.com/HangKebun74/lazyeditor</a></p>
+    </div>
+
+    <script src="lazyeditor.js"></script>
+    <script>
+        function addNewEditor() {
+            const container = document.querySelector('.preset-grid');
+            const newCard = document.createElement('div');
+            newCard.className = 'preset-card';
+            newCard.innerHTML = `
+                <h3>New Editor</h3>
+                <p>Try editing this text:</p>
+                <textarea class="lazy[m]" rows="4">New editor added dynamically!</textarea>
+            `;
+            container.appendChild(newCard);
+            
+            // Re-initialize to pick up new textarea
+            if (window.LazyEditor && window.LazyEditor.refresh) {
+                window.LazyEditor.refresh();
+            }
+        }
+    </script>
+</body>
+</html>

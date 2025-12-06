@@ -1,0 +1,365 @@
+/* =============================================================================
+   LAZYEDITOR v1.0.0 - Main Styles
+   ============================================================================= */
+   
+:root {
+    /* Color Variables */
+    --le-bg: #f8fbff;
+    --le-border: #c3d9ff;
+    --le-toolbar-bg: #e8f0ff;
+    --le-btn-bg: white;
+    --le-btn-border: #a8c6ff;
+    --le-btn-color: #2b6cb0;
+    --le-btn-hover-bg: #f0f7ff;
+    --le-btn-hover-border: #63b3ed;
+    --le-view-bg: #bee3f8;
+    --le-view-border: #90cdf4;
+    --le-view-color: #2c5282;
+    --le-active: #4299e1;
+    --le-editor-bg: transparent;
+    --le-code-bg: #f7fafc;
+    --le-text: #2d3748;
+    --le-status-bg: #edf2f7;
+    --le-status: #718096;
+    --le-divider: #e2e8f0;
+    --le-link: #3182ce;
+    --le-focus-bg: #ffffff;
+    --le-code-color: #c53030;
+    --le-quote-border: #cbd5e0;
+    --le-quote-bg: #f7fafc;
+    --le-debug-bg: #fffacd;
+    --le-debug-border: #ffd700;
+    --le-debug-text: #654321;
+    --le-error-bg: #fee;
+    --le-error-border: #f99;
+    --le-error-text: #c00;
+}
+
+/* Core container */
+.lazy-editor {
+    border: 1px solid var(--le-border);
+    border-radius: 3px;
+    background: var(--le-bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Toolbar */
+.lazy-editor .le-toolbar {
+    background: var(--le-toolbar-bg);
+    padding: 6px 8px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--le-border);
+    min-height: 36px;
+    align-items: center;
+    border-radius: 3px 3px 0 0;
+}
+
+/* Button Base Styles - ASCII TEXT ONLY */
+.lazy-editor .le-btn {
+    border: 1px solid var(--le-btn-border);
+    background: var(--le-btn-bg);
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 13px;
+    color: var(--le-btn-color);
+    transition: all 0.12s ease;
+    font-weight: 500;
+    min-height: 28px;
+    min-width: 28px;
+    text-align: center;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    line-height: 1;
+    user-select: none;
+    box-shadow: none;
+}
+
+.lazy-editor .le-btn:hover:not(:disabled) {
+    background: var(--le-btn-hover-bg);
+    border-color: var(--le-btn-hover-border);
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(99, 179, 237, 0.15);
+}
+
+.lazy-editor .le-btn:active:not(:disabled) { 
+    transform: translateY(0); 
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.lazy-editor .le-btn:disabled { 
+    opacity: 0.4; 
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+/* View Toggle */
+.lazy-editor .le-view {
+    border: 1px solid var(--le-view-border);
+    background: var(--le-view-bg);
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--le-view-color);
+    font-weight: 500;
+    transition: all 0.12s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    user-select: none;
+    font-family: inherit;
+    min-height: 28px;
+}
+
+.lazy-editor .le-view:hover:not(:disabled) {
+    background: #90cdf4;
+    border-color: var(--le-active);
+}
+
+.lazy-editor .le-view.active {
+    background: var(--le-active);
+    color: white;
+    border-color: var(--le-active);
+    font-weight: 600;
+}
+
+.lazy-editor .le-view:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Editor Areas */
+.lazy-editor .le-editor-area {
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--le-text);
+    box-sizing: border-box;
+    width: 100%;
+    overflow-y: auto;
+    min-height: 80px;
+    background: var(--le-editor-bg);
+}
+
+/* Design Mode */
+.lazy-editor .le-design {
+    outline: none;
+    font-family: inherit;
+    cursor: text;
+}
+
+.lazy-editor .le-design:focus { 
+    background: var(--le-focus-bg);
+    outline: none;
+}
+
+.lazy-editor .le-design[placeholder]:empty:before {
+    content: attr(placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+    font-style: italic;
+}
+
+.lazy-editor .le-design ul,
+.lazy-editor .le-design ol { 
+    padding-left: 20px; 
+    margin: 6px 0; 
+}
+
+.lazy-editor .le-design a { 
+    color: var(--le-link); 
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* HTML Mode */
+.lazy-editor .le-html {
+    display: none;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    resize: vertical;
+    border: none;
+    border-top: 1px solid var(--le-divider);
+    border-radius: 0 0 3px 3px;
+    background: var(--le-code-bg);
+    cursor: text;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.lazy-editor .le-html:focus {
+    outline: none;
+    background: var(--le-focus-bg);
+    box-shadow: inset 0 0 0 1px var(--le-active);
+}
+
+/* Status Bar */
+.lazy-editor .le-status {
+    background: var(--le-status-bg);
+    border-top: 1px solid var(--le-divider);
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--le-status);
+    font-style: italic;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 0 3px 3px;
+    gap: 8px;
+}
+
+/* Debug Panel - YELLOW BAR with ERROR HIGHLIGHTING */
+.lazy-editor .le-debug {
+    background: var(--le-debug-bg);
+    border-top: 1px solid var(--le-debug-border);
+    padding: 6px 8px;
+    font-size: 11px;
+    color: var(--le-debug-text);
+    font-family: 'Courier New', Consolas, monospace;
+    line-height: 1.3;
+    display: none;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.lazy-editor.debug-mode .le-debug { display: block !important; }
+
+.debug-header { 
+    color: #8b4513;
+    font-weight: 600;
+    border-bottom: 1px solid var(--le-debug-border);
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.debug-line {
+    margin: 2px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.debug-marker {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1;
+    margin-top: 1px;
+    min-width: 8px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* ASCII SYMBOLS ONLY - NO UNICODE */
+.debug-info .debug-marker { color: #0066cc; }
+.debug-success .debug-marker { color: #008800; }
+.debug-warning .debug-marker { color: #cc6600; }
+.debug-error .debug-marker { color: #cc0000; }
+.debug-title .debug-marker { color: #8b4513; }
+
+.debug-message {
+    flex: 1;
+    word-break: break-word;
+    font-size: 10.5px;
+    white-space: pre-wrap;
+}
+
+.debug-title .debug-message {
+    font-weight: 600;
+    color: #8b4513;
+}
+
+/* Long separator - left justified */
+.debug-separator {
+    text-align: left;
+    color: #cc9900;
+    margin: 4px 0;
+    font-size: 9px;
+    letter-spacing: 0px;
+}
+
+/* ERROR HIGHLIGHT - Current error message */
+.debug-error-highlight {
+    background-color: var(--le-error-bg);
+    border: 1px solid var(--le-error-border);
+    border-radius: 2px;
+    padding: 3px 6px;
+    margin: 3px 0;
+    color: var(--le-error-text);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(204,0,0,0.1);
+}
+
+.debug-error-highlight .debug-marker {
+    color: #c00;
+    font-weight: bold;
+}
+
+.debug-error-highlight .debug-message {
+    color: #c00;
+    font-weight: 600;
+}
+
+/* Code location hint */
+.debug-code-location {
+    font-size: 9px;
+    color: #666;
+    font-style: italic;
+    margin-top: 1px;
+    padding-left: 14px;
+}
+
+/* Special Formatting Styles */
+.lazy-editor .le-design pre,
+.lazy-editor .le-design code {
+    background: var(--le-code-bg);
+    color: var(--le-code-color);
+    font-family: 'Courier New', Consolas, monospace;
+    border-radius: 2px;
+    padding: 1px 4px;
+    font-size: 13px;
+}
+
+.lazy-editor .le-design pre {
+    display: block;
+    padding: 8px;
+    margin: 6px 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+.lazy-editor .le-design blockquote {
+    border-left: 2px solid var(--le-quote-border);
+    background: var(--le-quote-bg);
+    padding: 6px 12px;
+    margin: 6px 0;
+    font-style: italic;
+}
+
+/* Button Command Styles - ASCII ONLY */
+.lazy-editor .le-btn[data-cmd="bold"] { font-weight: 700; }
+.lazy-editor .le-btn[data-cmd="italic"] { font-style: italic; }
+.lazy-editor .le-btn[data-cmd="underline"] { text-decoration: underline; }
+.lazy-editor .le-btn[data-cmd="strikethrough"] { text-decoration: line-through; }
+.lazy-editor .le-btn[data-cmd="formatCode"] { color: var(--le-code-color); }
+.lazy-editor .le-btn[data-cmd="formatQuote"] { font-style: italic; }
+
+/* Hide format buttons in HTML mode */
+.lazy-editor .le-toolbar.html-mode .le-btn:not(.le-view) { display: none; }
+
+/* RTL Support */
+.lazy-editor .le-design[dir="rtl"] { text-align: right; direction: rtl; }
+.lazy-editor .le-design[dir="rtl"] ul,
+.lazy-editor .le-design[dir="rtl"] ol { padding-right: 20px; padding-left: 0; }

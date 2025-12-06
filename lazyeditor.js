@@ -1,0 +1,1072 @@
+/*******************************************************************************
+ * LAZYEDITOR v1.0.0 - Lightweight WYSIWYG HTML Editor
+ * 
+ * ============================================================================
+ * 🚀 GETTING STARTED - JUST 2 STEPS!
+ * ============================================================================
+ * 
+ * STEP 1: Add this script to your page's <head> section
+ * 
+ * STEP 2: Convert any textarea by adding class="lazy[m]" (or any preset)
+ * 
+ * Examples:
+ *   <textarea class="lazy[m]">Basic editor</textarea>
+ *   <textarea class="lazy[xxl]">Full featured editor</textarea>
+ *   <textarea class="lazy[1,2,7]">Custom buttons: Bold, Italic, Link</textarea>
+ * 
+ * ============================================================================
+ * 📋 AVAILABLE PRESETS (choose one):
+ * ============================================================================
+ * 
+ * lazy[zzz]  - No buttons (empty toolbar)
+ * lazy[xs]   - Bold, Italic (2 buttons)
+ * lazy[s]    - Bold, Italic, Bullet List (3 buttons)
+ * lazy[m]    - Bold, Italic, Bullet List, Numbered List, Link (5 buttons) [DEFAULT]
+ * lazy[l]    - Adds Underline, Horizontal Line (7 buttons)
+ * lazy[xl]   - Adds Strikethrough (8 buttons)
+ * lazy[xxl]  - Adds Code, Quote, Remove Format, Print, RTL (13 buttons)
+ * 
+ * ============================================================================
+ * 🎮 BUTTON REFERENCE (ID: Text - Description):
+ * ============================================================================
+ * 
+ * 1:  B     - Bold text (Ctrl+B)
+ * 2:  I     - Italic text (Ctrl+I)
+ * 3:  U     - Underline text (Ctrl+U)
+ * 4:  S     - Strikethrough text
+ * 5:  *     - Bullet list
+ * 6:  1.    - Numbered list
+ * 7:  URL   - Insert link (Ctrl+K)
+ * 8:  ---   - Horizontal line
+ * 9:  IMG   - Insert image [PLACEHOLDER - not implemented]
+ * 10: CODE  - Code block (wraps selection in <pre><code>)
+ * 11: QUOTE - Blockquote (wraps selection in <blockquote>)
+ * 12: TABLE - Insert table [PLACEHOLDER - not implemented]
+ * 13: X     - Remove formatting from selected text
+ * 14: PRN   - Print content
+ * 15: RTL   - Toggle text direction (RTL/LTR)
+ * 
+ * ============================================================================
+ * ⌨️ KEYBOARD SHORTCUTS:
+ * ============================================================================
+ * 
+ * Ctrl+B - Bold
+ * Ctrl+I - Italic
+ * Ctrl+U - Underline
+ * Ctrl+K - Insert link (opens URL prompt)
+ * 
+ * ============================================================================
+ * ⚙️ CONFIGURATION (edit in LE_CONFIG below):
+ * ============================================================================
+ * 
+ * debugMode: true/false           - Show/hide debug panel (set false for production)
+ * defaultPreset: 'm'              - Default button preset
+ * defaultHeight: '160px'          - Initial editor height
+ * hideFormatButtonsInHtmlMode: true - Clean HTML view
+ * enablePlaceholder: true         - Show "Type here..." when empty
+ * debounceDelay: 250              - Auto-save delay in milliseconds
+ * 
+ * ============================================================================
+ * 🐛 DEBUGGING HELP:
+ * ============================================================================
+ * 
+ * When debugMode: true, errors appear in YELLOW debug panel with:
+ * - Clear error messages in plain English
+ * - Code location hints
+ * - Suggested fixes
+ * 
+ * ASCII symbols in debug log:
+ * >  Information
+ * +  Success
+ * !  Warning
+ * x  Error (highlighted in red)
+ * 
+ * ============================================================================
+ * 📖 FULL DOCUMENTATION:
+ * ============================================================================
+ * 
+ * GitHub: https://github.com/HangKebun74/lazyeditor
+ * Issues: https://github.com/HangKebun74/lazyeditor/issues
+ * 
+ * ============================================================================
+ * 📄 LICENSE: MIT
+ * ============================================================================
+ * 
+ * Copyright (c) 2024 - Free to use, modify, and distribute
+ * 
+ ******************************************************************************/
+
+// =============================================================================
+// CORE CONFIGURATION - USER EDITABLE SETTINGS
+// =============================================================================
+
+const LE_CONFIG = {
+    // ==================== BEHAVIOR SETTINGS ====================
+    debugMode: true,                      // true = show debug panel, false = hide for production
+    defaultHeight: '160px',               // Default editor height
+    hideFormatButtonsInHtmlMode: true,    // Hide format buttons in HTML view
+    enablePlaceholder: true,              // Show placeholder when editor is empty
+    debounceDelay: 250,                   // Delay for auto-save (milliseconds)
+    defaultPreset: 'm',                   // Default button preset (xs, s, m, l, xl, xxl, zzz)
+    
+    // ==================== DISPLAY SETTINGS ====================
+    showBranding: true,                   // Show "LazyEditor" in status bar
+    brandingText: 'LazyEditor',           // Branding text (change if needed)
+    showVersion: true,                    // Show version number in status bar
+    versionText: 'v1.0.0',                // Version text
+    showPresetInfo: true,                 // Show preset name in status bar
+    
+    // ==================== BUTTON DEFINITIONS ====================
+    buttons: {
+        1:  { text: 'B', cmd: 'bold', title: 'Bold (Ctrl+B)', desc: 'Bold text' },
+        2:  { text: 'I', cmd: 'italic', title: 'Italic (Ctrl+I)', desc: 'Italic text' },
+        3:  { text: 'U', cmd: 'underline', title: 'Underline (Ctrl+U)', desc: 'Underline text' },
+        4:  { text: 'S', cmd: 'strikethrough', title: 'Strikethrough', desc: 'Strike text' },
+        5:  { text: '*', cmd: 'insertUnorderedList', title: 'Bullet List', desc: 'Bullet list' },
+        6:  { text: '1.', cmd: 'insertOrderedList', title: 'Numbered List', desc: 'Numbered list' },
+        7:  { text: 'URL', cmd: 'createLink', title: 'Insert Link (Ctrl+K)', desc: 'Insert link' },
+        8:  { text: '---', cmd: 'insertHorizontalRule', title: 'Horizontal Line', desc: 'Insert line' },
+        9:  { text: 'IMG', cmd: 'insertImage', title: 'Insert Image', desc: 'Insert image' },
+        10: { text: 'CODE', cmd: 'formatCode', title: 'Code Block', desc: 'Code block' },
+        11: { text: 'QUOTE', cmd: 'formatQuote', title: 'Blockquote', desc: 'Blockquote' },
+        12: { text: 'TABLE', cmd: 'insertTable', title: 'Insert Table', desc: 'Insert table' },
+        13: { text: 'X', cmd: 'removeFormat', title: 'Remove Formatting', desc: 'Clear formatting' },
+        14: { text: 'PRN', cmd: 'print', title: 'Print Content', desc: 'Print content' },
+        15: { text: 'RTL', cmd: 'toggleRTL', title: 'Toggle RTL', desc: 'Toggle direction' }
+    },
+    
+    // ==================== PRESET CONFIGURATIONS ====================
+    presets: {
+        'zzz': [],
+        'xs':  [1, 2],
+        's':   [1, 2, 5],
+        'm':   [1, 2, 5, 6, 7],
+        'l':   [1, 2, 3, 5, 6, 7, 8],
+        'xl':  [1, 2, 3, 4, 5, 6, 7, 8],
+        'xxl': [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13, 14, 15]
+    }
+};
+
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+const LE_UTILS = {
+    createElement(tag, className, innerHTML) {
+        const el = document.createElement(tag);
+        if (className) el.className = className;
+        if (innerHTML) el.innerHTML = innerHTML;
+        return el;
+    },
+    
+    getDimension(el, dimension) {
+        const style = el.style[dimension];
+        if (style && style !== 'auto') return style;
+        
+        const computed = getComputedStyle(el)[dimension];
+        if (computed && computed !== 'auto' && computed !== '0px') return computed;
+        
+        const offset = el[`offset${dimension.charAt(0).toUpperCase() + dimension.slice(1)}`];
+        if (offset > 0) return `${offset}px`;
+        
+        if (dimension === 'height' && el.rows) {
+            return `${Math.max(60, (el.rows * 18) + 30)}px`;
+        }
+        
+        return null;
+    },
+    
+    parseConfig(className) {
+        const match = className.match(/\blazy\[([^\]]*)\]/);
+        if (!match) return { ids: [], source: 'none', valid: false };
+        
+        const configStr = match[1].trim();
+        if (!configStr) {
+            const preset = LE_CONFIG.presets[LE_CONFIG.defaultPreset] || LE_CONFIG.presets.m;
+            return { ids: preset, source: LE_CONFIG.defaultPreset, valid: true };
+        }
+        
+        if (LE_CONFIG.presets[configStr]) {
+            return { ids: LE_CONFIG.presets[configStr], source: configStr, valid: true };
+        }
+        
+        const ids = [];
+        const parts = configStr.split(',');
+        
+        for (const part of parts) {
+            const id = parseInt(part.trim(), 10);
+            if (!isNaN(id) && id >= 1 && id <= 15 && !ids.includes(id)) {
+                ids.push(id);
+            }
+        }
+        
+        if (ids.length > 0) {
+            return { ids: ids, source: configStr, valid: true };
+        }
+        
+        const preset = LE_CONFIG.presets[LE_CONFIG.defaultPreset] || LE_CONFIG.presets.m;
+        return { ids: preset, source: LE_CONFIG.defaultPreset, valid: true };
+    },
+    
+    // Get current line number for error reporting (approximate)
+    getErrorLocation() {
+        try {
+            throw new Error();
+        } catch (e) {
+            const stack = e.stack || '';
+            const lines = stack.split('\n');
+            // Find the first line that's in our code (not browser internals)
+            for (let i = 2; i < lines.length; i++) {
+                if (lines[i].includes('lazy-editor') || lines[i].includes('<anonymous>')) {
+                    return `Stack trace line ${i-1}`;
+                }
+            }
+            return 'Unknown location';
+        }
+    }
+};
+
+// =============================================================================
+// DEBUG SYSTEM - WITH ERROR HIGHLIGHTING AND HELPFUL MESSAGES
+// =============================================================================
+
+const LE_DEBUG = {
+    enabled: LE_CONFIG.debugMode,
+    messages: [],
+    lastError: null,
+    
+    // Add message to debug log with friendly error messages
+    add(message, type = 'info', codeLocation = '') {
+        if (!this.enabled) return;
+        
+        const entry = {
+            type: type,
+            text: message,
+            location: codeLocation,
+            timestamp: Date.now()
+        };
+        
+        this.messages.push(entry);
+        
+        // Store last error for quick reference
+        if (type === 'error') {
+            this.lastError = entry;
+        }
+    },
+    
+    // Add error with helpful suggestions
+    addError(message, context = '', suggestion = '') {
+        if (!this.enabled) return;
+        
+        const fullMessage = message + 
+            (context ? '\nContext: ' + context : '') +
+            (suggestion ? '\nFix: ' + suggestion : '');
+        
+        const location = LE_UTILS.getErrorLocation();
+        this.add(fullMessage, 'error', location);
+    },
+    
+    addSeparator() {
+        if (!this.enabled) return;
+        this.messages.push({ 
+            type: 'separator', 
+            text: '----------------------------------------',
+            timestamp: Date.now()
+        });
+    },
+    
+    addTitle(title) {
+        if (!this.enabled) return;
+        this.messages.push({ 
+            type: 'title', 
+            text: title,
+            timestamp: Date.now()
+        });
+    },
+    
+    // Display debug log with error highlighting
+    show(editor) {
+        if (!this.enabled || !editor || this.messages.length === 0) return;
+        
+        let debugEl = editor.querySelector('.le-debug');
+        if (!debugEl) {
+            debugEl = LE_UTILS.createElement('div', 'le-debug');
+            editor.appendChild(debugEl);
+        }
+        
+        const debugHTML = `
+            <div class="debug-header">LAZYEDITOR DEBUG LOG - v1.0.0</div>
+            <div class="debug-line debug-info">
+                <span class="debug-marker">></span>
+                <span class="debug-message">Debug mode active. Errors appear below with helpful messages.</span>
+            </div>
+            ${this.lastError ? `
+            <div class="debug-line debug-error-highlight">
+                <span class="debug-marker">!</span>
+                <span class="debug-message"><strong>CURRENT ERROR:</strong><br>${this.lastError.text.split('\n')[0]}</span>
+            </div>
+            <div class="debug-code-location">Location: ${this.lastError.location || 'Unknown'}</div>
+            ` : ''}
+            <div class="debug-separator">----------------------------------------</div>
+            ${this.messages.map(msg => {
+                if (msg.type === 'separator') {
+                    return `<div class="debug-separator">${msg.text}</div>`;
+                }
+                if (msg.type === 'title') {
+                    return `<div class="debug-line debug-title">
+                        <span class="debug-marker">></span>
+                        <span class="debug-message">${msg.text}</span>
+                    </div>`;
+                }
+                
+                const markers = { 
+                    info: '>',
+                    success: '+',
+                    warning: '!',
+                    error: 'x'
+                };
+                
+                const isError = msg.type === 'error';
+                const errorClass = isError ? 'debug-error-highlight' : '';
+                const locationHint = msg.location ? `<div class="debug-code-location">Code location: ${msg.location}</div>` : '';
+                
+                return `<div class="debug-line debug-${msg.type} ${errorClass}">
+                    <span class="debug-marker">${markers[msg.type] || '>'}</span>
+                    <span class="debug-message">${msg.text}</span>
+                    ${locationHint}
+                </div>`;
+            }).join('')}`;
+        
+        debugEl.innerHTML = debugHTML;
+        editor.classList.add('debug-mode');
+        
+        // Scroll to show the most recent error
+        setTimeout(() => {
+            const errorElements = debugEl.querySelectorAll('.debug-error-highlight');
+            if (errorElements.length > 0) {
+                errorElements[errorElements.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                debugEl.scrollTop = debugEl.scrollHeight;
+            }
+        }, 100);
+    },
+    
+    clear() { 
+        this.messages = [];
+        this.lastError = null;
+    },
+    
+    // Get summary of current errors
+    getErrorSummary() {
+        const errors = this.messages.filter(m => m.type === 'error');
+        if (errors.length === 0) return 'No errors detected';
+        
+        const lastError = errors[errors.length - 1];
+        return `${errors.length} error(s). Latest: ${lastError.text.split('\n')[0].substring(0, 50)}...`;
+    }
+};
+
+// =============================================================================
+// FORMAT REMOVER
+// =============================================================================
+
+const FORMAT_REMOVER = {
+    removeFormat(design) {
+        try {
+            LE_DEBUG.add('Attempting to clear formatting from selected text', 'info');
+            const sel = window.getSelection();
+            
+            if (!sel.rangeCount) {
+                LE_DEBUG.addError(
+                    'No text selected for format removal',
+                    'User clicked Remove Format without selecting text',
+                    'Select some text first, then click the X button'
+                );
+                alert('Please select some text first to remove formatting');
+                return false;
+            }
+            
+            const range = sel.getRangeAt(0);
+            if (range.collapsed) {
+                LE_DEBUG.addError(
+                    'Empty selection for format removal',
+                    'Selection is collapsed (cursor position only)',
+                    'Drag to select text, then try again'
+                );
+                alert('Please select some text (not just a cursor position)');
+                return false;
+            }
+            
+            if (document.execCommand('removeFormat', false, null)) {
+                LE_DEBUG.add('Formatting successfully cleared from selection', 'success');
+                return true;
+            }
+            
+            LE_DEBUG.addError(
+                'Format removal command failed',
+                'Browser execCommand("removeFormat") returned false',
+                'Try selecting different text or check browser compatibility'
+            );
+            return false;
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error removing formatting: ' + e.message,
+                'Exception in FORMAT_REMOVER.removeFormat',
+                'Check browser console for details. Common issue: permission or selection error.'
+            );
+            return false;
+        }
+    }
+};
+
+// =============================================================================
+// SPECIAL FORMATTING (Buttons 10 & 11)
+// =============================================================================
+
+const SPECIAL_FORMATS = {
+    formatCode() {
+        try {
+            const sel = window.getSelection();
+            if (!sel.toString().trim()) {
+                LE_DEBUG.addError(
+                    'No text selected for code formatting',
+                    'User clicked CODE button without selection',
+                    'Select text first, then click CODE button'
+                );
+                alert('Select text to format as code');
+                return false;
+            }
+            
+            const range = sel.getRangeAt(0);
+            const selectedText = sel.toString();
+            
+            const code = document.createElement('code');
+            code.textContent = selectedText;
+            
+            const pre = document.createElement('pre');
+            pre.appendChild(code);
+            
+            range.deleteContents();
+            range.insertNode(pre);
+            
+            LE_DEBUG.add('Code block created successfully', 'success');
+            return true;
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error creating code block: ' + e.message,
+                'Exception in SPECIAL_FORMATS.formatCode',
+                'Make sure text is properly selected. Try selecting different content.'
+            );
+            return false;
+        }
+    },
+    
+    formatQuote() {
+        try {
+            const sel = window.getSelection();
+            if (!sel.toString().trim()) {
+                LE_DEBUG.addError(
+                    'No text selected for quote formatting',
+                    'User clicked QUOTE button without selection',
+                    'Select text first, then click QUOTE button'
+                );
+                alert('Select text to format as blockquote');
+                return false;
+            }
+            
+            const range = sel.getRangeAt(0);
+            const selectedText = sel.toString();
+            
+            const quote = document.createElement('blockquote');
+            quote.textContent = selectedText;
+            
+            range.deleteContents();
+            range.insertNode(quote);
+            
+            LE_DEBUG.add('Blockquote created successfully', 'success');
+            return true;
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error creating blockquote: ' + e.message,
+                'Exception in SPECIAL_FORMATS.formatQuote',
+                'Make sure text is properly selected. Try selecting different content.'
+            );
+            return false;
+        }
+    }
+};
+
+// =============================================================================
+// EDITOR BUILDER
+// =============================================================================
+
+const EDITOR_BUILDER = {
+    create(textarea) {
+        try {
+            if (textarea._leInitialized) {
+                LE_DEBUG.add('Editor already initialized for this textarea', 'warning', 'EDITOR_BUILDER.create line 1');
+                return null;
+            }
+            
+            textarea._leInitialized = true;
+            const config = LE_UTILS.parseConfig(textarea.className);
+            
+            if (!config.valid) {
+                LE_DEBUG.addError(
+                    'Invalid configuration in class name: ' + textarea.className,
+                    'LE_UTILS.parseConfig returned invalid result',
+                    'Use valid preset like "lazy[m]" or button list like "lazy[1,2,7]"'
+                );
+                return null;
+            }
+            
+            LE_DEBUG.add('Creating editor with preset: "' + config.source + '"', 'info', 'EDITOR_BUILDER.create line 15');
+            LE_DEBUG.add('Button IDs loaded: ' + config.ids.join(', '), 'info');
+            
+            const width = LE_UTILS.getDimension(textarea, 'width') || '100%';
+            const height = LE_UTILS.getDimension(textarea, 'height') || LE_CONFIG.defaultHeight;
+            const content = textarea.value || '';
+            
+            const editorHTML = this._buildHTML(config, content, width, height);
+            textarea.style.display = 'none';
+            textarea.insertAdjacentHTML('afterend', editorHTML);
+            
+            const editor = textarea.nextElementSibling;
+            
+            // Initialize HTML textarea with RAW HTML
+            const html = editor.querySelector('.le-html');
+            if (html) {
+                html.value = content;
+            }
+            
+            setTimeout(() => LE_DEBUG.show(editor), 100);
+            LE_DEBUG.add('Editor created successfully\nButtons: ' + config.ids.length + '\nPreset: ' + config.source, 'success');
+            
+            return editor;
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error creating editor: ' + e.message,
+                'Exception in EDITOR_BUILDER.create',
+                'Check textarea exists and has proper class. Ensure no JavaScript conflicts.'
+            );
+            return null;
+        }
+    },
+    
+    _buildHTML(config, content, width, height) {
+        try {
+            const buttons = config.ids.map(id => {
+                const btn = LE_CONFIG.buttons[id];
+                return btn ? '<button class="le-btn" data-cmd="' + btn.cmd + '" title="' + btn.title + '">' + btn.text + '</button>' : '';
+            }).join('');
+            
+            let statusText = '';
+            if (LE_CONFIG.showBranding) statusText += LE_CONFIG.brandingText;
+            if (LE_CONFIG.showPresetInfo) statusText += ' <small>[' + config.source + ']</small>';
+            if (LE_CONFIG.showVersion) statusText += ' <small>' + LE_CONFIG.versionText + '</small>';
+            
+            return '<div class="lazy-editor" style="width:' + width + '">' +
+                   '<div class="le-toolbar">' + buttons +
+                   '<div style="margin-left:auto; display:flex; gap:3px;">' +
+                   '<button class="le-view active" data-view="design">Design</button>' +
+                   '<button class="le-view" data-view="html">HTML</button>' +
+                   '</div></div>' +
+                   '<div class="le-design le-editor-area" contenteditable="true" style="height:' + height + '"' +
+                   (LE_CONFIG.enablePlaceholder ? ' placeholder="Type here..."' : '') + '>' +
+                   content + '</div>' +
+                   '<textarea class="le-html le-editor-area" style="height:' + height + '">' + content + '</textarea>' +
+                   '<div class="le-status"><span>' + statusText + '</span></div>' +
+                   '<div class="le-debug"></div>' +
+                   '</div>';
+                   
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error building editor HTML: ' + e.message,
+                'Exception in EDITOR_BUILDER._buildHTML',
+                'Check configuration values and content encoding'
+            );
+            return '<div class="lazy-editor" style="color:red; padding:20px;">Error building editor. Check console.</div>';
+        }
+    }
+};
+
+// =============================================================================
+// EVENT HANDLER
+// =============================================================================
+
+const EVENT_HANDLER = {
+    init() {
+        try {
+            this._setupClickEvents();
+            this._setupInputEvents();
+            this._setupKeyboardEvents();
+            LE_DEBUG.add('Event handlers initialized successfully\nReady for user interaction', 'success', 'EVENT_HANDLER.init');
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Error initializing event handlers: ' + e.message,
+                'Exception in EVENT_HANDLER.init',
+                'Check for JavaScript conflicts or browser compatibility issues'
+            );
+        }
+    },
+    
+    _setupClickEvents() {
+        document.addEventListener('click', (e) => {
+            try {
+                const btn = e.target.closest('.le-btn');
+                const view = e.target.closest('.le-view');
+                const editor = e.target.closest('.lazy-editor');
+                
+                if (!editor) return;
+                e.preventDefault();
+                
+                if (btn) this._handleButton(btn, editor);
+                else if (view) this._handleView(view, editor);
+                
+            } catch (e) {
+                LE_DEBUG.addError(
+                    'Click event error: ' + e.message,
+                    'Exception in EVENT_HANDLER._setupClickEvents callback',
+                    'Check button/editor DOM structure and event handlers'
+                );
+            }
+        });
+    },
+    
+    _setupInputEvents() {
+        let timer = null;
+        document.addEventListener('input', (e) => {
+            try {
+                const target = e.target;
+                const editor = target.closest('.lazy-editor');
+                if (!editor) return;
+                
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    if (target.classList.contains('le-design')) {
+                        this._syncDesign(editor, target);
+                        LE_DEBUG.add('Design content updated\nChanges saved to textarea', 'info');
+                    } else if (target.classList.contains('le-html')) {
+                        this._syncHTML(editor, target);
+                        LE_DEBUG.add('HTML content updated\nChanges saved to textarea', 'info');
+                    }
+                }, LE_CONFIG.debounceDelay);
+                
+            } catch (e) {
+                LE_DEBUG.addError(
+                    'Input event error: ' + e.message,
+                    'Exception in EVENT_HANDLER._setupInputEvents callback',
+                    'Check editor synchronization logic'
+                );
+            }
+        });
+    },
+    
+    _setupKeyboardEvents() {
+        document.addEventListener('keydown', (e) => {
+            try {
+                const design = e.target.closest('.le-design');
+                if (!design) return;
+                
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    const shortcuts = {
+                        'b': () => { 
+                            document.execCommand('bold'); 
+                            LE_DEBUG.add('Keyboard shortcut: Ctrl+B\nToggled bold formatting', 'info'); 
+                        },
+                        'i': () => { 
+                            document.execCommand('italic'); 
+                            LE_DEBUG.add('Keyboard shortcut: Ctrl+I\nToggled italic formatting', 'info'); 
+                        },
+                        'u': () => { 
+                            document.execCommand('underline'); 
+                            LE_DEBUG.add('Keyboard shortcut: Ctrl+U\nToggled underline formatting', 'info'); 
+                        },
+                        'k': () => this._createLinkPrompt()
+                    };
+                    const action = shortcuts[e.key.toLowerCase()];
+                    if (action) action();
+                }
+            } catch (e) {
+                LE_DEBUG.addError(
+                    'Keyboard event error: ' + e.message,
+                    'Exception in EVENT_HANDLER._setupKeyboardEvents callback',
+                    'Check keyboard shortcut handlers'
+                );
+            }
+        });
+    },
+    
+    _handleButton(button, editor) {
+        try {
+            const cmd = button.dataset.cmd;
+            const design = editor.querySelector('.le-design');
+            if (!design) {
+                LE_DEBUG.addError(
+                    'Design element not found for button click',
+                    'editor.querySelector(".le-design") returned null',
+                    'Check editor DOM structure - .le-design should exist'
+                );
+                return;
+            }
+            
+            design.focus();
+            
+            const buttonInfo = Object.values(LE_CONFIG.buttons).find(b => b.cmd === cmd);
+            if (buttonInfo) {
+                LE_DEBUG.add('Button clicked: ' + buttonInfo.text + '\nAction: ' + buttonInfo.desc, 'info');
+            }
+            
+            const specialActions = {
+                createLink: () => this._createLinkPrompt(),
+                print: () => this._print(editor),
+                toggleRTL: () => this._toggleRTL(design),
+                removeFormat: () => FORMAT_REMOVER.removeFormat(design),
+                formatCode: () => SPECIAL_FORMATS.formatCode(),
+                formatQuote: () => SPECIAL_FORMATS.formatQuote()
+            };
+            
+            if (specialActions[cmd]) {
+                specialActions[cmd]();
+            } else if (cmd) {
+                if (!document.execCommand(cmd, false, null)) {
+                    LE_DEBUG.addError(
+                        'Command execution failed: ' + cmd,
+                        'document.execCommand returned false',
+                        'This command may not be supported in your browser. Try different selection.'
+                    );
+                }
+            }
+            
+            this._syncDesign(editor, design);
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Button handler error: ' + e.message,
+                'Exception in EVENT_HANDLER._handleButton',
+                'Check button commands and DOM operations'
+            );
+        }
+    },
+    
+    _handleView(view, editor) {
+        try {
+            const viewType = view.dataset.view;
+            const design = editor.querySelector('.le-design');
+            const html = editor.querySelector('.le-html');
+            const textarea = editor.previousElementSibling;
+            const toolbar = editor.querySelector('.le-toolbar');
+            
+            if (!design || !html || !textarea) {
+                LE_DEBUG.addError(
+                    'Missing editor elements for view switch',
+                    'One or more required elements not found',
+                    'Check editor DOM structure after initialization'
+                );
+                return;
+            }
+            
+            LE_DEBUG.add('View switching: ' + viewType.toUpperCase() + '\nOnly changing display, not content', 'info');
+            
+            if (viewType === 'html') {
+                html.value = textarea.value;
+                design.style.display = 'none';
+                html.style.display = 'block';
+                html.focus();
+                if (LE_CONFIG.hideFormatButtonsInHtmlMode) {
+                    toolbar.classList.add('html-mode');
+                }
+            } else {
+                design.innerHTML = textarea.value;
+                html.style.display = 'none';
+                design.style.display = 'block';
+                design.focus();
+                toolbar.classList.remove('html-mode');
+            }
+            
+            editor.querySelectorAll('.le-view').forEach(v => v.classList.remove('active'));
+            view.classList.add('active');
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'View switch error: ' + e.message,
+                'Exception in EVENT_HANDLER._handleView',
+                'Check view switching logic and DOM element states'
+            );
+        }
+    },
+    
+    _createLinkPrompt() {
+        try {
+            const url = prompt('Enter URL (include http:// or https://):', 'https://');
+            if (url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    LE_DEBUG.addError(
+                        'Invalid URL entered: ' + url,
+                        'URL missing protocol (http:// or https://)',
+                        'Always include http:// or https:// at the beginning of URLs'
+                    );
+                    alert('Please include http:// or https:// at the beginning of the URL');
+                    return;
+                }
+                document.execCommand('createLink', false, url);
+                LE_DEBUG.add('Link created successfully\nURL: ' + url, 'success');
+            } else {
+                LE_DEBUG.add('Link creation cancelled\nUser clicked cancel', 'warning');
+            }
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Link prompt error: ' + e.message,
+                'Exception in EVENT_HANDLER._createLinkPrompt',
+                'Check URL validation and execCommand execution'
+            );
+        }
+    },
+    
+    _print(editor) {
+        try {
+            const design = editor.querySelector('.le-design');
+            if (!design) {
+                LE_DEBUG.addError(
+                    'Design element not found for printing',
+                    'editor.querySelector(".le-design") returned null',
+                    'Check editor DOM structure before printing'
+                );
+                return;
+            }
+            
+            LE_DEBUG.add('Opening print dialog\nContent will be printed', 'info');
+            const win = window.open('', '_blank');
+            win.document.write('<html><head><title>Print</title>' +
+                               '<style>body { font-family: Arial; padding: 20px; line-height: 1.5; }' +
+                               'pre { background: #f5f5f5; padding: 8px; }' +
+                               'blockquote { border-left: 2px solid #ccc; padding-left: 12px; }</style>' +
+                               '</head><body>' + design.innerHTML + '</body>' +
+                               '<script>setTimeout(() => window.print(), 100)<\/script></html>');
+            win.document.close();
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Print error: ' + e.message,
+                'Exception in EVENT_HANDLER._print',
+                'Check popup blocking and print dialog permissions'
+            );
+        }
+    },
+    
+    _toggleRTL(design) {
+        try {
+            const sel = window.getSelection();
+            if (!sel.toString().trim()) {
+                LE_DEBUG.addError(
+                    'No text selected for RTL toggle',
+                    'User clicked RTL button without selection',
+                    'Select text first, then click RTL button'
+                );
+                alert('Select text first to change its direction');
+                return;
+            }
+            
+            const range = sel.getRangeAt(0);
+            let el = range.commonAncestorContainer;
+            if (el.nodeType === 3) el = el.parentElement;
+            
+            const dir = el.getAttribute('dir');
+            const newDir = dir === 'rtl' ? 'ltr' : 'rtl';
+            el.setAttribute('dir', newDir);
+            design.focus();
+            
+            LE_DEBUG.add('Text direction changed\nNew direction: ' + newDir.toUpperCase(), 'success');
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'RTL toggle error: ' + e.message,
+                'Exception in EVENT_HANDLER._toggleRTL',
+                'Check selection and DOM attribute operations'
+            );
+        }
+    },
+    
+    _syncDesign(editor, design) {
+        try {
+            const textarea = editor.previousElementSibling;
+            if (!textarea) return;
+            
+            textarea.value = design.innerHTML;
+            textarea.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            const html = editor.querySelector('.le-html');
+            if (html && html.style.display !== 'none') {
+                html.value = design.innerHTML;
+            }
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Design sync error: ' + e.message,
+                'Exception in EVENT_HANDLER._syncDesign',
+                'Check editor synchronization and DOM updates'
+            );
+        }
+    },
+    
+    _syncHTML(editor, html) {
+        try {
+            const textarea = editor.previousElementSibling;
+            if (!textarea) return;
+            
+            textarea.value = html.value;
+            textarea.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            const design = editor.querySelector('.le-design');
+            if (design && design.style.display !== 'none') {
+                design.innerHTML = html.value;
+            }
+        } catch (e) {
+            LE_DEBUG.addError(
+                'HTML sync error: ' + e.message,
+                'Exception in EVENT_HANDLER._syncHTML',
+                'Check textarea synchronization and DOM updates'
+            );
+        }
+    }
+};
+
+// =============================================================================
+// MAIN INITIALIZATION
+// =============================================================================
+
+const LAZY_EDITOR = {
+    init() {
+        try {
+            LE_DEBUG.clear();
+            LE_DEBUG.addTitle('LAZYEDITOR v1.0.0 INITIALIZED');
+            LE_DEBUG.addSeparator();
+            LE_DEBUG.add('System: Ready\nMode: Debug (set debugMode: false for production)', 'info', 'LAZY_EDITOR.init');
+            
+            this._applyStyles();
+            this._convertTextareas();
+            EVENT_HANDLER.init();
+            
+            LE_DEBUG.addSeparator();
+            LE_DEBUG.add('All systems operational\nASCII buttons loaded\nSimple view switcher active', 'success');
+            
+        } catch (e) {
+            console.error('LazyEditor initialization error:', e);
+            LE_DEBUG.addError(
+                'Initialization error: ' + e.message,
+                'Exception in LAZY_EDITOR.init',
+                'Check browser console for details. Ensure no JavaScript conflicts.'
+            );
+        }
+    },
+    
+    _applyStyles() {
+        try {
+            if (document.getElementById('lazy-editor-styles')) return;
+            const style = document.createElement('style');
+            style.id = 'lazy-editor-styles';
+            style.textContent = ':root{}';
+            document.head.appendChild(style);
+            LE_DEBUG.add('CSS styles applied successfully', 'success');
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Style application error: ' + e.message,
+                'Exception in LAZY_EDITOR._applyStyles',
+                'Check CSS injection and head element availability'
+            );
+        }
+    },
+    
+    _convertTextareas() {
+        try {
+            const textareas = document.querySelectorAll('textarea');
+            let converted = 0;
+            let errors = 0;
+            
+            textareas.forEach(textarea => {
+                if (/\blazy\[/.test(textarea.className)) {
+                    const result = EDITOR_BUILDER.create(textarea);
+                    if (result) {
+                        converted++;
+                    } else {
+                        errors++;
+                    }
+                }
+            });
+            
+            LE_DEBUG.add('Textareas converted: ' + converted + '\nLazyEditor instances created', 'success');
+            if (errors > 0) {
+                LE_DEBUG.addError(
+                    errors + ' textarea(s) failed to convert',
+                    'EDITOR_BUILDER.create returned null',
+                    'Check textarea classes and configuration'
+                );
+            }
+            
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Textarea conversion error: ' + e.message,
+                'Exception in LAZY_EDITOR._convertTextareas',
+                'Check textarea selection and DOM manipulation'
+            );
+        }
+    },
+    
+    refresh() {
+        try {
+            document.querySelectorAll('.lazy-editor').forEach(el => el.remove());
+            document.querySelectorAll('textarea').forEach(ta => delete ta._leInitialized);
+            this.init();
+            LE_DEBUG.add('Editor refreshed successfully', 'success');
+        } catch (e) {
+            LE_DEBUG.addError(
+                'Refresh error: ' + e.message,
+                'Exception in LAZY_EDITOR.refresh',
+                'Check DOM cleanup and reinitialization'
+            );
+        }
+    },
+    
+    // Public API
+    getDebugInfo() {
+        return {
+            errors: LE_DEBUG.messages.filter(m => m.type === 'error').length,
+            lastError: LE_DEBUG.lastError,
+            summary: LE_DEBUG.getErrorSummary()
+        };
+    }
+};
+
+// =============================================================================
+// STARTUP
+// =============================================================================
+
+(function() {
+    'use strict';
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
+    try {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => LAZY_EDITOR.init());
+        } else {
+            LAZY_EDITOR.init();
+        }
+        
+        window.LazyEditor = LAZY_EDITOR;
+        
+    } catch (e) {
+        console.error('LazyEditor startup error:', e);
+        // Even if initialization fails, at least show an error
+        if (typeof LE_DEBUG !== 'undefined') {
+            LE_DEBUG.addError(
+                'Startup error: ' + e.message,
+                'Exception in startup IIFE',
+                'Check browser compatibility and JavaScript environment'
+            );
+        }
+    }
+})();
